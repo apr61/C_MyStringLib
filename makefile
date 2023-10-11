@@ -1,19 +1,41 @@
-rm = del
+# Makefile for a C project with multiple source files and a "build" directory
 
-cm : mystrlen.o mystrcmp.o main.o
-	gcc mystrlen.o mystrcmp.o main.o -o cm
+# Compiler and compiler flags
+CC = gcc
+CFLAGS = -Wall -g
+rm := rd /s /q
 
-mystrlen.o : ./src/mystrlen.c
-	gcc -c ./src/mystrlen.c
+# Source file directory
+SRC_DIR = src
+# Build directory
+BUILD_DIR = build
 
-mystrcmp.o : ./src/mystrcmp.c
-	gcc -c ./src/mystrcmp.c
+# List of source files (all .c files in SRC_DIR)
+SOURCES = $(wildcard $(SRC_DIR)/*.c)
 
-main.o : main.c
-	gcc -c main.c 
+# Object files derived from source files
+OBJECTS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SOURCES))
 
-clean : 
-	@echo "clean started"
-	$(rm) cm.exe
-	$(rm) *.o
-	@echo "clean completed"
+# Executable name
+EXECUTABLE = myprogram
+
+# Default target (first target in the file)
+all: $(BUILD_DIR)/$(EXECUTABLE)
+
+# Rule to build the executable
+$(BUILD_DIR)/$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+# Rule to build object files
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Create the build directory if it doesn't exist
+$(BUILD_DIR):
+	mkdir $(BUILD_DIR)
+
+# Clean up the project
+clean:
+	${rm} $(BUILD_DIR)
+
+.PHONY: all clean
